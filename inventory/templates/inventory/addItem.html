@@ -1,0 +1,24 @@
+<h1> Add new inventory </h1>
+{% if new_addition %}
+	{{new_addition}} has been successfully added.
+{% endif %}
+<form action="" method="post">
+	<input type="text" id="name" name="item_name"/><label for="name">Item Name</label><br/>
+	<select name="category">
+		{% for category in categories%}
+			<option id="cateogory" value = "{{category.category_id}}">{{category.category_name}}</option>
+		{% endfor %}
+	</select><label for="category">Category</label><br/>
+	<select name="size">
+		{% for size in sizes%}
+			<option value = "{{size.size_id}}">{{size.size_name}}</option>
+		{% endfor %}
+	</select><label for="size">Size</label><br/>
+	<select name="gender">
+		{% for gender in genders%}
+			<option value = "{{gender.gender_id}}">{{gender.gender_name}}</option>
+		{% endfor %}
+	</select><label for="gender">Gender</label><br/>
+	{% csrf_token %}
+	<input type="submit"/>
+</form>

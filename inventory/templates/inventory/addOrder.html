@@ -1,0 +1,84 @@
+{% extends 'inventory/header.html' %}
+{% block styles %}
+<style>
+.vertical-center {
+    margin: auto;
+}
+</style>
+{% endblock %}
+{% block scripts %}
+<script>
+	function addFormListener(){
+		var form = document.getElementById('csform')
+		form.addEventListener('submit',function(e){
+			e.preventDefault();getUsers(document.getElementById('custsearch').value);
+			return false
+		},false)
+	}
+
+	function getUsers(search){
+		searchUrl = '{% url "inventory:get_customers" %}' + search
+		$.get(searchUrl,function(data){displayUserResults(data)})
+		return false
+	}
+
+	function displayUserResults(data){
+		elem = document.getElementById('userResults')
+		console.log(elem.innerHTML)
+		elem.innerHTML = ''
+		if(data==""){
+			var emptyTable = document.createElement("tr")
+			var text = document.createTextNode("No users matching search terms")
+			emptyTable.appendChild(text)
+			elem.appendChild(emptyTable)
+		}else{
+			var table = document.createElement("table")
+			table.className = "table table-bordered"
+			tbody = table.appendChild(document.createElement("tbody"))
+			for(var i = 0; i < data.length; i++){
+				var row = document.createElement("tr")
+				var fname = document.createTextNode(data[i].fields.first_name)
+				var lname = document.createTextNode(data[i].fields.last_name)
+				var email = document.createTextNode(data[i].fields.email)
+				var phone = document.createTextNode(data[i].fields.phone)
+				var uomstudent = document.createTextNode(data[i].fields.is_uom_student)
+				var cell = document.createElement("td")					
+				row.appendChild(cell).appendChild(fname)
+				var cell = document.createElement("td")
+				row.appendChild(cell).appendChild(lname)
+				var cell = document.createElement("td")
+				row.appendChild(cell).appendChild(email)
+				var cell = document.createElement("td")
+				row.appendChild(cell).appendChild(phone)
+				var cell = document.createElement("td")
+				row.appendChild(cell).appendChild(uomstudent)
+				var link = document.createElement("td")
+				link.className = "link";
+				var use = document.createElement("a")
+				use.href = data[i].pk
+				use.appendChild(document.createTextNode('Use'))
+				row.appendChild(link).appendChild(use)
+				tbody.appendChild(row)
+			}
+			elem.appendChild(table)
+		}
+	}
+
+	$(document).ready(addFormListener);
+</script>
+{% endblock %}
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class='text-center'>
+			<h1>Select customer</h1>
+			<form id='csform'>
+				<input type="text" id='custsearch'/>
+				<input type="submit"/>
+			</form>
+			<div id="userResults" class="table-responsive"></div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'inventory/header.html' %}
+
+
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="text-center">
+			<h1> Add New Gender</h1>
+			{% if new_addition %}
+				{{new_addition}} has been successfully added.
+			{% endif %}
+		</div>	
+		<form action="" method="post">
+			<input type="text" name="gender_name"/><label for="gender_name">&nbspGender Name</label><br/>
+			{% csrf_token %}
+			<input type="submit"/>
+		</form>
+	</div>
+</div>

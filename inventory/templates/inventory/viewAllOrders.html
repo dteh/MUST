@@ -1,0 +1,17 @@
+{% extends 'inventory/header.html' %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block main %}
+	<div class="container">
+		<div class="col-md-3"></div>
+		<div class="col-md-6">
+			<div class="text-center">
+				<h1>{{title}}</h1>
+				{% for order in data %}
+					<h3><a href="{% url 'inventory:view_order' order_id=order.order_id %}">Order [{{order.order_id}}] - {{order.customer.first_name}} {{order.customer.last_name}}</a></h3>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'inventory/header.html' %}
+
+{% block main %}
+<div class='container'>
+	<div class='col-md-3'></div>
+	<div class='col-md-6'>
+		<div class='text-center'>
+			<h1>Order Summary</h1>
+		</div>
+			Order for {{fname}} {{lname}} // ORDER ID: {{oid}}<br/>
+			Status: {{status}}<br/>
+			Paid: {{paid}}<br/>
+			Return date: {{returndate}}<br/><br/>
+
+			Cost per day: {{cpd}}<br/>
+			Number of days: {{days}}<br/>
+			Discount: {{discount}}<br/>
+			Total Cost: {{total}}<br/><br/>
+		<div class='table-responsive'>
+			<table class='table table-bordered'>
+				<thead>
+					<tr><td>Item Name</td><td>Brand</td><td>Size</td><td>Category</td><td>Gender</td></tr>
+				</thead>
+				<tbody>
+				{% for item in data %} 
+					<tr><td>{{item.item_name}}</td><td>{{item.brand.brand_name}}</td><td>{{item.size.size_name}}</td><td>{{item.category.category_name}}</td><td>{{item.gender.gender_name}}</td></tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% if complete == False %}
+			{% if paid == False %}
+				<form action="{% url 'inventory:change_status' order_id=oid %}">
+					<input type="submit" value="Mark as PAID"/>
+				</form>
+			{% else %}
+				<form action="{% url 'inventory:change_status' order_id=oid %}">
+					<input type="submit" value="Mark as UNPAID"/>			
+				</form>
+				{% if returnpage %}
+					<form action="{% url 'inventory:return_order' order_id=oid %}">
+						<input type="submit" value="Mark order as COMPLETE (Customer has returned items)">
+					</form>
+				{% endif %}
+			{% endif %}
+		{% endif %}
+
+	</div>
+</div>
+{% endblock %}

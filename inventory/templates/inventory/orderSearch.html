@@ -1,0 +1,69 @@
+{% extends 'inventory/header.html' %}
+
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="text-center">
+			<h1>Search Orders</h1>
+			<form id='osform'>
+				<input type="text" id='ordersearch'/>
+				<input type="submit"/>
+			</form>
+		</div>
+		<div id="orderResults"></div>
+	</div>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script>
+	function addFormListener(){
+		var form = document.getElementById('osform')
+		form.addEventListener('submit',function(e){
+			e.preventDefault();getUsers(document.getElementById('ordersearch').value);
+			return false
+		},false)
+	}
+
+	function getUsers(search){
+		searchUrl = '{% url "inventory:get_search_orders" %}' + search
+		$.get(searchUrl,function(data){displayUserResults(data)})
+		return false
+	}
+
+	function displayUserResults(data){
+		elem = document.getElementById('orderResults')
+		console.log(elem.innerHTML)
+		elem.innerHTML = ''
+		console.log(data)
+		if(data==""){
+			var text = document.createTextNode("No orders matching search terms")
+			elem.appendChild(text)
+		}else{
+
+			for(var i = 0; i < data.length; i++){
+				var div = document.createElement("div")
+				div.className = ""
+
+				var title = document.createElement("h3")
+				var a = document.createElement("a")
+				a.href = "../" + data[i].pk
+				a.text = "Order [" + data[i].pk + "] - " + data[i].fields.customer[0] + " " + data[i].fields.customer[1]
+				title.appendChild(a)
+				div.appendChild(title)
+				for(var j = 0; j< data[i].fields.order_items.length; j++){
+					var itemdetail = document.createTextNode(data[i].fields.order_items[j][1] + ": " +data[i].fields.order_items[j][0]);
+					div.appendChild(itemdetail);
+					div.appendChild(document.createElement('br'))
+				}
+			}
+			elem.appendChild(div)
+		}
+	}
+
+	$(document).ready(addFormListener);
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<h1>All attributes</h1>
+{% if customers %}
+	<h2>Items</h2>
+	{% for each in customers %}
+		<li>{{each.first_name}} {{each.last_name}} - {{each.is_uom_student}} - {{each.email}}</li>
+	{% endfor %}
+{% endif %}
+<br\>
+{% if items %}
+	<h2>Items</h2>
+	{% for each in items %}
+		<li>{{each.item_name}} - {{each.category.category_name}} - {{each.size.size_name}} - {{each.gender.gender_name}}</li>
+	{% endfor %}
+{% endif %}
+<br\>
+{% if genders %}
+	<h2>Genders</h2>
+	{% for each in genders %}
+		<li>{{each}}</li>
+	{% endfor %}
+{% endif %}
+<br\>
+{% if categories %}
+	<h2>Categories</h2>
+	{% for each in categories %}
+		<li>{{each}}</li>
+	{% endfor %}
+{% endif %}
+<br\>
+{% if sizes %}
+	<h2>Sizes</h2>
+	{% for each in sizes %}
+		<li>{{each}}</li>
+	{% endfor %}
+{% endif %}

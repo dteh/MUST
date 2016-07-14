@@ -1,0 +1,28 @@
+{% extends 'inventory/header.html' %}
+
+
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="text-center">
+
+			<h1> Add New Customer</h1>
+			{% if new_addition %}
+				{{new_addition}} has been successfully added.
+			{% endif %}
+		</div>
+		<form action="" method="post">
+			<input type="text" name="first_name"/><label for="first_name">&nbspFirst Name</label><br/>
+			<input type="text" name="last_name"/><label for="last_name">&nbspLast Name</label><br/>
+			<input type="tel" name="phone"/><label for="phone">&nbspPhone Number</label><br/>
+			<input type="email" name="email"/><label for="email">&nbspEmail Address</label><br/>	
+			<input type="checkbox" id="uom_student" name="is_uom_student"/><label for="uom_student">&nbspIs a Unimelb student?</label>
+
+			{% csrf_token %}
+			<br/>
+			<input type="submit"/>
+		</form>
+	</div>
+</div>
+{% endblock %}	

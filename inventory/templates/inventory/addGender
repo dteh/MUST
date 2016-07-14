@@ -1,0 +1,6 @@
+<h1> Add New Gender</h1>
+
+<form action="{% url 'inventory:add_gender_create' %}" method="post">
+	<input type="text" id="GenderName"/><label for="name">Gender Name</label><br/>
+	{% csrf_token %}
+</form>

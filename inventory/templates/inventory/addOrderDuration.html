@@ -1,0 +1,98 @@
+{% extends 'inventory/header.html' %}
+
+{% block styles %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+{% endblock %}
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="text-center">
+			<h1>Add New Order</h1>
+			{% if fname %}
+				<h2> Order for {{fname}} {{lname}}</h2>
+			{% endif %}
+		</div>
+		{% if data %}
+		<div class="table-responsive">
+			<table class="table table-bordered">
+				<thead>
+					<tr><th>Item Name</th><th>Brand</th><th>Size</th><th>Category</th><th>Gender</th></tr>
+				</thead>
+				<tbody>
+				{% for item in data %}
+					<tr><td>{{item.item_name}}</td><td>{{item.brand.brand_name}}</td><td>{{item.size.size_name}}</td><td>{{item.category.category_name}}</td><td>{{item.gender.gender_name}}</td></tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class="text-center">
+			<h2> Order Length:</h2>
+		</div>
+
+	    <div class="row">
+            <div class="form-group">
+                <div class='input-group date' id='datetimepicker1'>
+                    <input form="order" type='text' name="returndate" class="form-control" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({
+                	format: 'YYYY-MM-DD',
+                	minDate: 'now'
+                }).on('dp.change',function(e){calculateCost(e.date._d)});
+            });
+        </script>
+	    </div>
+	    <form name="order" id="order" method="POST" action="{% url 'inventory:add_order_summary' customer_id=cid %}">
+	    	{% csrf_token %}
+	    	{% for item in itemids %}
+	    	<input hidden name="item" type="text" value="{{item}}"/>
+	    	{% endfor %}
+	    	<input hidden id='form-cpd' name="cpd" type="text" value='0'/>
+	    	<input hidden id='form-days' name="days" type="text" value='0'/>
+	    	<input disabled id='submit' type="submit" value="Place order"/>
+	    </form>
+	    <div class='table-responsive'>
+	    	<table class='table table-bordered'>
+	    		<thead>
+	    			<tr><td>Cost Per Day</td><td>Number of Days</td><td>Total</td></tr>
+	    		</thead>
+	    		<tbody>
+	    			<tr><td>{{cpd}}</td><td id='days'>0</td><td id='cost-totals'>0</td>
+	    		</tbody>
+	    	</table>
+	   	</div>
+
+		{% endif %}
+	</div>
+</div>
+{% endblock %}
+
+{% block includescripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function calculateCost(date){
+	var days = Math.ceil(moment.duration(date-moment.now()).asDays())
+	var cpd = {{cpd}};
+	$('#days').text(days);
+	$('#cost-totals').text(days*cpd);
+	$('#form-cpd')[0].value = cpd;
+	$('#form-days')[0].value = days;
+
+	if(days < 1){
+		$('#submit').attr('disabled',true)
+	}else{$('#submit').attr('disabled',false)};
+}
+</script>
+{% endblock %}
+
+{% block title %}Length of Order{% endblock %}

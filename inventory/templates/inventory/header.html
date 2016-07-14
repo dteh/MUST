@@ -1,0 +1,68 @@
+<html>
+<head>
+	<title>{% block title %}{% endblock %}</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+	<nav class="navbar navbar-default navbar-static-top ">
+		<div class="container-fluid">
+		    <div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#must-nav" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+	  			</button>
+	  			<a class="navbar-brand" href="/">MUST</a>
+			</div>
+			<div class="collapse navbar-collapse" id="must-nav">
+				<ul class="nav navbar-nav">
+				<!-- shit goes in here -->
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspoppup="true" aria-expanded="false">Rentals<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href='{% url "inventory:add_order" %}'>New Order</a></li>
+							<li><a href='{% url "inventory:view_search_orders" %}'>Returns</a></li>
+							<li><a href='{% url "inventory:view_all_orders" %}'>View All Orders</a></li>
+							<li><a href='{% url "inventory:view_outstanding_orders" %}'>View Outstanding</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspoppup="true" aria-expanded="false">Inventory/Management<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a href='{% url "inventory:add_customer" %}'>Add New Customer</a></li>
+							<li><a href='{% url "inventory:add_item" %}'>Add New Item</a></li>
+							<li><a href='{% url "inventory:add_category" %}'>Add New Category</a></li>
+							<li><a href='{% url "inventory:add_brand" %}'>Add New Brand</a></li>
+							<li><a href='{% url "inventory:add_size" %}'>Add New Size</a></li>
+							<li><a href='{% url "inventory:add_gender" %}'>Add New Gender</a></li>
+						</ul>
+					</li>
+				</ul>
+
+				<ul class="nav navbar-nav navbar-right">
+					{% if user.socialaccount_set %}<li><a href="{% url 'account_logout' %}">Hi, {{user.socialaccount_set.all.0.user}} (logout)</a></li>
+					{% else %}
+					<li><a href="/accounts/login/">Log in</a></li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+	</nav>
+    {% if user.is_authenticated %}
+        {% if user.is_staff%}
+        	{% block includescripts %}{% endblock %}
+        	{% block styles %}{% endblock %}
+            {% block main %}{% endblock %}
+            {% block scripts %}{% endblock %}
+        {% else %}
+            <h1>Please ask an administrator to activate your account</h1>
+        {% endif %}
+    {% else %}
+        <h1>Please <a href='/accounts/login/'>login</a> to see this page</h1>
+    {% endif %}
+</body>
+</html>

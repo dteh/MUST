@@ -1,0 +1,21 @@
+{% extends 'inventory/header.html' %}
+
+
+{% block main %}
+<div class="container">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div class="text-center">
+			<h1> Add New Size</h1>
+			{% if new_addition %}
+				{{new_addition}} has been successfully added.
+			{% endif %}
+		</div>
+		<form action="" method="post">
+			<input type="text" name="size_name"/><label for="size_name">&nbspSize Name</label><br/>
+			{% csrf_token %}
+			<input type="submit"/>
+		</form>
+	</div>
+</div>
+{% endblock %}

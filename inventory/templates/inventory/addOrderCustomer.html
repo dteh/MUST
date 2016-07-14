@@ -1,0 +1,254 @@
+{% extends 'inventory/header.html' %}
+{% block styles %}
+<style>
+.active-item {
+	background-color:#99ff99;
+}
+.inactive-item{
+	background-color:#FFFFFF;
+}
+</style>
+
+{% endblock %}
+
+{% block main %}
+	<div class="container">
+		<div class="col-md-3"></div>
+		<div class="col-md-6">
+			<div class="text-center">
+			<h1>Add New Order</h1>
+			{% if fname %}
+				<h2> Order for {{fname}} {{lname}}</h2>
+			{% endif %}
+			</div>
+			<form id="selectors" class="form-group">
+				<div class="row">
+					<label for="brand">Brand</label>
+					<select disabled name="brand" id="brand" class="form-control">
+						<option value="">Loading..</option>
+					</select>
+				</div>
+				<div class="row">
+					<label for="category">Category</label>				
+					<select disabled name="category" id="category" class="form-control">
+						<option value="">Loading..</option>
+					</select>
+				</div>
+				<div class="row">	
+					<label for="size">Size</label>						
+					<select disabled name="size" id="size" class="form-control">
+						<option value="">Loading..</option>
+					</select>
+				</div>
+				<div class="row">
+					<label for="size">Size</label>						
+					<select disabled name="gender" id="gender" class="form-control">
+						<option value="">Loading..</option>
+					</select>
+					<input id='submitbutton' disabled type='submit' value='Filter'>
+				</div>
+			</form>
+			<div id='inventorydiv' class="row">
+				<form name='inventory' id='inventory' method="post" action='{% url "inventory:add_order_duration" customer_id=cid %}'/>
+			</div>
+			<br/>
+			<div class="row">
+			<input hidden type="submit" form="inventory" id='next'/>
+			{% csrf_token %}
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block scripts %}
+	<script>
+		function getAvailable() {
+			x = $.get('{% url "inventory:add_order_get_inventory" %}',function(){y = x.responseText;getCategories()});
+		};
+
+		function getCategories(){
+			c = $.get('{% url "inventory:enum_categories" %}', function(){addOptions(c.responseText,'category')})
+		}
+
+		function getSizes(){
+			sz = $.get('{% url "inventory:enum_sizes" %}', function(){addOptions(sz.responseText,'size')})
+		}
+
+		function getBrands(){
+			b = $.get('{% url "inventory:enum_brands" %}', function(){addOptions(b.responseText,'brand')})
+		}
+		function getGenders(){
+			g = $.get('{% url "inventory:enum_genders" %}', function(){addOptions(g.responseText,'gender');enableSubmit()})
+		}
+
+		function loadSelectors(){
+			var load = $.Deferred();
+			getBrands();
+			getCategories();
+			getSizes();
+			getGenders();
+		}
+
+		function enableSubmit(){
+			$('#submitbutton').attr('disabled',false);
+			disableSubmitAction();
+			console.log('hello')
+		}
+
+		function addOptions(data,selector){
+			var d = JSON.parse(data)
+			console.log(d)
+			for(var i = 0; i < d.length; i++){
+				var optionNode = document.createElement('option')
+				optionNode.value = d[i].pk
+				for(var key in d[i].fields){
+					var text = document.createTextNode(eval('d[i].fields.'+key))
+					break
+				}
+				optionNode.appendChild(text)
+				$('#'+selector).append(optionNode)
+			}
+			$('#'+selector)[0][0].text = 'All'
+			$('#'+selector).attr('disabled',false)
+		}
+
+		function disableSubmitAction(){
+			var form = document.getElementById('selectors')
+			form.addEventListener('submit',function(e){
+				e.preventDefault();
+				ajaxSubmit()
+			})
+		}
+
+		function ajaxSubmit(){
+			var invurl = '{% url "inventory:add_order_get_inventory" %}'+'?' + $('#selectors').serialize()
+			$.ajax({
+				url:invurl,
+				type:'GET',
+				success:function(r){
+					renderItems(r)
+				},
+				error:function(){
+					prepareForNewResults()
+					$('#inventory').append("<div class='error'>No items found for selected filters</div>")
+				}
+			})
+		}
+
+		function renderItems(data){
+			prepareForNewResults()
+			cdict = JSON.parse(c.responseText);
+			sdict = JSON.parse(sz.responseText);
+			bdict = JSON.parse(b.responseText);
+			gdict = JSON.parse(g.responseText);
+			console.log('received data')
+			data.forEach(function(element){
+				existing = document.getElementsByName(element.fields.item_name)
+				if(existing.length == 0){
+					console.log(element)
+					var division = document.createElement('div')
+					division.className = 'item'
+					var label = document.createElement('label')
+					var labelText = document.createTextNode(element.fields.item_name + ' | ' + bdict[getDictIndex(bdict,element.fields.brand)].fields.brand_name + ' | ' + sdict[getDictIndex(sdict,element.fields.size)].fields.size_name + ' | ' + cdict[getDictIndex(cdict,element.fields.category)].fields.category_name + ' | ' + gdict[getDictIndex(gdict,element.fields.gender)].fields.gender_name)
+					var select = document.createElement('input')
+					select.type = 'checkbox'
+					select.name = 'item'
+					select.hidden = 'true'
+					select.value = element.pk
+					label.appendChild(labelText)
+					label.appendChild(select)
+					division.appendChild(label)
+					$('#inventory').append(division)
+				}
+
+			})
+			bindCheckedListener();
+			bindSelectedListener();
+		}
+
+		function getDictIndex(dict,pk){
+			for(var i = 0; i < dict.length; i++){
+				if(dict[i].pk == pk){
+					return i
+				}
+			}
+		}
+
+		function bindSelectedListener(){
+			checkboxes = $('input[name="item"');
+			checkboxes.bind("click",function(e){
+				if(e.target.parentElement.parentElement.className == "item"){
+						e.target.parentElement.parentElement.className ="item active-item";
+					}else{
+						e.target.parentElement.parentElement.className = "item";
+					}
+			});
+		}
+
+
+		function prepareForNewResults(){
+			errors = document.getElementsByClassName('error')
+			if(errors.length != 0){
+				errors[0].remove()
+			}
+			children = $('#inventory').children()
+			if(children.length != 0){
+				for(var i = 0; i < children.length; i++){
+					if(children[i].getElementsByTagName('input')[0].checked != true){
+						children[i].remove()
+					}
+				}
+			}
+			else(function(){$('#inventory').innerHTML="";});
+		}
+
+		function formatResponse(data,categories){
+			var z = JSON.parse(data)
+			catnames = JSON.parse(categories)
+			cats = {}
+			for (var i = 0; i < z.length;i++){
+				if(cats[z[i].fields.category] == undefined){
+					cats[z[i].fields.category] = [z[i]]
+				}else{
+					cats[z[i].fields.category].push(z[i])
+				}
+			}; createAccordion(cats,catnames)
+		};
+
+
+		function createAccordion(categories,categorynames){
+			for(var i = 0; i < categorynames.length; i++){
+				var section = document.createElement("button");
+				section.className = "accordion"
+				section.id=categorynames[i].fields.category_name
+				var sectiondiv = document.createElement("div");
+				sectiondiv.className = "panel"
+				section.appendChild(sectiondiv)
+				document.getElementById('inventory').appendChild(section)
+			};
+			populateAccordion(categories,categorynames);
+		}
+		function populateAccordion(categories,categorynames){
+			for(var i = 1; i < categories.length; i++){
+				var name = categorynames[i].fields.category_name
+				for(var j = 0; j < categories[i].length; j++){
+					categories[i][j].fields.item_name
+				}
+			}
+		}
+		y = null;
+		s = loadSelectors();
+		$('[name=csrfmiddlewaretoken]').attr('form','inventory')
+
+		function bindCheckedListener(){
+			cl = $('.item')
+			cl.change(function(){
+				$('#next').attr('hidden',true)
+				if($('#inventory input:checkbox:checked').length > 0){
+					$('#next').attr('hidden',false)
+				}
+			});
+		}
+
+	</script>
+{% endblock %}
